@@ -44,8 +44,8 @@ public class RobotContainer {
     return Commands.print("No autonomous command configured");
   }
 
-  public void initShuffleboard() {
-    shooter.reportToSmartDashboard();
-  }
+  // public void initShuffleboard() {
+  //   shooter.reportToSmartDashboard();
+  // }
 }
 

@@ -4,36 +4,46 @@ import java.util.ArrayList;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
-import com.ctre.phoenix.motorcontrol.can.TalonFX;
+import com.ctre.phoenixpro.controls.DutyCycleOut;
+// import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenixpro.controls.Follower;
+// import com.ctre.phoenix.motorcontrol.can.TalonFX;
+import com.ctre.phoenixpro.controls.VoltageOut;
+import com.ctre.phoenixpro.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 
 public class Shooter {
-    private TalonFX leftShooter;
-    private TalonFX rightShooter;
-    double percentOutputTop = 0.5;
-    double percentOutputBottom = 0.1;
+    final TalonFX leftShooter;
+    final TalonFX rightShooter;
 
     private double[] speeds = {-0.1, 0.5, 0.7};
     private double[] speeds2 = {-0.1, 0.5, 0.7};
     private int index = 0;
 
-    public Shooter(){
-        leftShooter = new TalonFX(10);
-        rightShooter = new TalonFX(11);
-        
-        leftShooter.configVoltageCompSaturation(11);
-        rightShooter.configVoltageCompSaturation(11);
+    final VoltageOut m_leftVoltageRequest = new VoltageOut(0);
+    final VoltageOut m_rightVoltageRequest = new VoltageOut(0);
+    final DutyCycleOut m_leftDutyCycleRequest = new DutyCycleOut(0);
+    final DutyCycleOut m_rightDutyCyclerequest = new DutyCycleOut(0);
 
-        leftShooter.enableVoltageCompensation(true);
-        rightShooter.enableVoltageCompensation(false);
+
+    public Shooter(){
+        leftShooter = new TalonFX(17, "CANivore1");
+        rightShooter = new TalonFX(18, "CANivore1");
         
+        // leftShooter.configVoltageCompSaturation(11);
+        // rightShooter.configVoltageCompSaturation(11);
+        // leftShooter.enableVoltageCompensation(true);
+        // rightShooter.enableVoltageCompensation(false);
+        
+        leftShooter.setControl(m_leftVoltageRequest.withOutput(11.0));
+        rightShooter.setControl(m_rightVoltageRequest.withOutput(11.0));
+
         leftShooter.setInverted(false);
-        rightShooter.setInverted(true);
-        // rightShooter.setInverted(TalonFXInvertType.FollowMaster);
-        
+        rightShooter.setControl(new Follower(leftShooter.getDeviceID(), false));
+
         SmartDashboard.putNumber("Power", 0);
     }
 
@@ -55,35 +65,17 @@ public class Shooter {
 
     public CommandBase setSpeed() {
         return Commands.runOnce(() -> {
-            leftShooter.set(ControlMode.PercentOutput, speeds[index]);
-            rightShooter.set(ControlMode.PercentOutput, speeds2[index]);
+            leftShooter.setControl(m_leftDutyCycleRequest.withOutput(speeds[index]));
+            leftShooter.setControl(m_leftDutyCycleRequest.withOutput(speeds2[index]));
+            SmartDashboard.putBoolean("Pressed", true);
         });
     }
 
-    // public CommandBase intake() {
-    //     return Commands.runOnce(() -> {
-    //         leftShooter.set(ControlMode.PercentOutput, -0.10);
-    //         rightShooter.set(ControlMode.PercentOutput, -0.10);
-    //         SmartDashboard.putBoolean("Intake", true);
-    //     });
-    // }
-    // public CommandBase outtakeSlow() {
-    //     return Commands.runOnce(() -> {
-    //         leftShooter.set(ControlMode.PercentOutput, percentOutputTop);
-    //         rightShooter.set(ControlMode.PercentOutput, percentOutputBottom);
-    //     });
-    // }
-    // public CommandBase outtakeFast() {
-    //     return Commands.runOnce(() -> {
-    //         leftShooter.set(ControlMode.PercentOutput, percentOutputTop);
-    //         rightShooter.set(ControlMode.PercentOutput, percentOutputBottom);
-    //     });
-    // }
-
     public CommandBase setPowerZero() {
         return Commands.runOnce(() -> {
-            leftShooter.set(ControlMode.PercentOutput, 0);
-            rightShooter.set(ControlMode.PercentOutput, 0);
+            leftShooter.setControl(m_leftDutyCycleRequest.withOutput(0));
+            leftShooter.setControl(m_leftDutyCycleRequest.withOutput(0));
+            SmartDashboard.putBoolean("Pressed", true);
         });
     }
 
@@ -109,30 +101,11 @@ public class Shooter {
         });
     }
 
-    // public void increaseOutputTop() {
-    //     percentOutputTop += .1;
+    // public void reportToSmartDashboard(){
+    //     SmartDashboard.putNumber("Left RPM", leftShooter.getSelectedSensorVelocity(0) * 10 / 2048);
+    //     SmartDashboard.putNumber("Right RPM", rightShooter.getSelectedSensorVelocity(0) * 10 / 2048);
+    //     SmartDashboard.putNumber("Left Current", leftShooter.getSupplyCurrent());
+    //     SmartDashboard.putNumber("Right Current", rightShooter.getSupplyCurrent());
     // }
-
-    // public void increaseOutputBottom() {
-    //     percentOutputBottom += .1;
-    // }
-
-    // public void decreaseOutputTop() {
-    //     percentOutputTop -= .1;
-    // }
-
-    // public void decreaseOutputBottom() {
-    //     percentOutputBottom -= .1;
-    // }
-
-    public void reportToSmartDashboard(){
-        // leftShooter.set(ControlMode.PercentOutput, SmartDashboard.getNumber("Power", 0));
-        // SmartDashboard.putNumber("Left RPM", leftShooter.getSelectedSensorVelocity(0) * 10 / 2048);
-        // SmartDashboard.putNumber("Right RPM", rightShooter.getSelectedSensorVelocity(0) * 10 / 2048);
-        // SmartDashboard.putNumber("Left Current", leftShooter.getSupplyCurrent());
-        // SmartDashboard.putNumber("Right Current", rightShooter.getSupplyCurrent());
-        SmartDashboard.putNumber("Percent Output Bottom", percentOutputBottom);
-        SmartDashboard.putNumber("Percent Output Top", percentOutputTop);
-    }
 
 }
