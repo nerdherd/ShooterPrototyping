@@ -28,16 +28,17 @@ public class RobotContainer {
     commandOperatorController.povRight().onTrue(shooter.decreaseBottom());
 
     commandOperatorController.triangle()
-      .onTrue(shooter.setIndex(0).andThen(shooter.setSpeed()))
+      .whileTrue(shooter.setIndex(0).andThen(shooter.setSpeed()))
       .onFalse(shooter.setPowerZero());
     
     commandOperatorController.square()
-      .onTrue(shooter.setIndex(1).andThen(shooter.setSpeed()))
+      .whileTrue(shooter.setIndex(1).andThen(shooter.setSpeed()))
       .onFalse(shooter.setPowerZero());
 
     commandOperatorController.circle()
-      .onTrue(shooter.setIndex(2).andThen(shooter.setSpeed()))
+      .whileTrue(shooter.setIndex(2).andThen(shooter.setSpeed()))
       .onFalse(shooter.setPowerZero());
+
   }
 
   public Command getAutonomousCommand() {

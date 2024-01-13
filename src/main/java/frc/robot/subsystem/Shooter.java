@@ -13,16 +13,24 @@ import edu.wpi.first.wpilibj2.command.Commands;
 public class Shooter {
     private TalonFX leftShooter;
     private TalonFX rightShooter;
-    double percentOutputTop = 0.5;
-    double percentOutputBottom = 0.1;
 
-    private double[] speeds = {-0.1, 0.5, 0.7};
-    private double[] speeds2 = {-0.1, 0.5, 0.7};
+    private double[] speedsLeft = {-0.1, 0.1, 0.0};
+    private double[] speedsRight = {-0.1, 0.1, 0.0};
+
+    double percentOutputTop = 0.0;
+    double percentOutputBottom = 0.0;
+
+    int velocityTop = 0; // 11700 is 60% output
+    int velocityBottom = 0;
+
     private int index = 0;
 
+    private boolean tooHigh = false;
+    private boolean tooLow = false;
+
     public Shooter(){
-        leftShooter = new TalonFX(10);
-        rightShooter = new TalonFX(11);
+        leftShooter = new TalonFX(19);
+        rightShooter = new TalonFX(20);
         
         leftShooter.configVoltageCompSaturation(11);
         rightShooter.configVoltageCompSaturation(11);
@@ -31,7 +39,7 @@ public class Shooter {
         rightShooter.enableVoltageCompensation(false);
         
         leftShooter.setInverted(false);
-        rightShooter.setInverted(true);
+        rightShooter.setInverted(false);
         // rightShooter.setInverted(TalonFXInvertType.FollowMaster);
         
         SmartDashboard.putNumber("Power", 0);
@@ -39,12 +47,23 @@ public class Shooter {
 
     public void printSpeeds() {
         SmartDashboard.putNumber("Index", index);
-        SmartDashboard.putNumber("IntakeTop", speeds[0]);
-        SmartDashboard.putNumber("OuttakeTop1", speeds[1]);
-        SmartDashboard.putNumber("OuttakeTop2", speeds[2]);
-        SmartDashboard.putNumber("IntakeBottom", speeds2[0]);
-        SmartDashboard.putNumber("OuttakeBottom1", speeds2[1]);
-        SmartDashboard.putNumber("OuttakeBottom2", speeds2[2]);
+
+        // SmartDashboard.putNumber("IntakeTop", speedsLeft[0]);
+        // SmartDashboard.putNumber("IntakeBottom", speedsRight[0]);
+
+        // SmartDashboard.putNumber("OuttakeTop1", speedsLeft[1]);
+        // SmartDashboard.putNumber("OuttakeBottom1", speedsRight[1]);
+
+        // SmartDashboard.putNumber("OuttakeTop2", speedsLeft[2]);
+        // SmartDashboard.putNumber("OuttakeBottom2", speedsRight[2]);
+
+        // SmartDashboard.putNumber("Percent Output Bottom: ", percentOutputBottom);
+        // SmartDashboard.putNumber("Percent Output Top: ", percentOutputTop);
+
+        SmartDashboard.putNumber("Ticks Per Second Top: ", velocityTop);
+        SmartDashboard.putNumber("Ticks Per Second Bottom ", velocityBottom);
+
+
     }
 
     public CommandBase setIndex(int index) {
@@ -54,31 +73,17 @@ public class Shooter {
     }
 
     public CommandBase setSpeed() {
-        return Commands.runOnce(() -> {
-            leftShooter.set(ControlMode.PercentOutput, speeds[index]);
-            rightShooter.set(ControlMode.PercentOutput, speeds2[index]);
+        return Commands.run(() -> {
+            // leftShooter.set(ControlMode.PercentOutput, speedsLeft[index]); // TODO DEBUG
+            // rightShooter.set(ControlMode.PercentOutput, speedsRight[index]);
+
+            // leftShooter.set(ControlMode.PercentOutput, percentOutputTop); // TODO DEBUG
+            // rightShooter.set(ControlMode.PercentOutput, percentOutputBottom);
+
+            leftShooter.set(ControlMode.Velocity, velocityTop); // TODO DEBUG
+            rightShooter.set(ControlMode.Velocity, velocityBottom);
         });
     }
-
-    // public CommandBase intake() {
-    //     return Commands.runOnce(() -> {
-    //         leftShooter.set(ControlMode.PercentOutput, -0.10);
-    //         rightShooter.set(ControlMode.PercentOutput, -0.10);
-    //         SmartDashboard.putBoolean("Intake", true);
-    //     });
-    // }
-    // public CommandBase outtakeSlow() {
-    //     return Commands.runOnce(() -> {
-    //         leftShooter.set(ControlMode.PercentOutput, percentOutputTop);
-    //         rightShooter.set(ControlMode.PercentOutput, percentOutputBottom);
-    //     });
-    // }
-    // public CommandBase outtakeFast() {
-    //     return Commands.runOnce(() -> {
-    //         leftShooter.set(ControlMode.PercentOutput, percentOutputTop);
-    //         rightShooter.set(ControlMode.PercentOutput, percentOutputBottom);
-    //     });
-    // }
 
     public CommandBase setPowerZero() {
         return Commands.runOnce(() -> {
@@ -89,23 +94,73 @@ public class Shooter {
 
     public CommandBase increaseTop() {
         return Commands.runOnce(() -> {
-            this.speeds[index] += 0.1;
+            // if (percentOutputTop <= 0.9) {
+            //     this.speedsLeft[2] += 0.05; // TODO DEBUG
+            //     percentOutputTop += 0.05;
+            //     tooHigh = false;
+            // }
+
+            if(velocityTop <= 21000) {
+                velocityTop += 1024;
+                tooHigh = false;
+            }
+            else {
+                tooHigh = true;
+            }
+            SmartDashboard.putBoolean("Too high", tooHigh);
         });
     }
+
     public CommandBase increaseBottom() {
         return Commands.runOnce(() -> {
-            this.speeds2[index] += 0.1;
+            // if(percentOutputBottom <= 0.9) {
+            //     this.speedsRight[2] += 0.05; // TODO DEBUG
+            //     percentOutputBottom += 0.05;
+            //     tooHigh = false;
+
+            if(velocityBottom <= 21000) {
+                velocityBottom += 1024;
+                tooHigh = false;
+            }
+            else {
+                tooHigh = true;
+            }
+            SmartDashboard.putBoolean("Too high", tooHigh);
         });
     }
 
     public CommandBase decreaseTop() {
         return Commands.runOnce(() -> {
-            this.speeds[index] -= 0.1;
+            // if(percentOutputTop >= 0.051) {
+            //     this.speedsLeft[2] -= 0.05; // TODO DEBUG
+            //     percentOutputTop -= 0.05;
+            //     tooLow = false;
+
+            if(velocityTop >= 1100) {
+                velocityTop -= 1024;
+                tooLow = false;
+            }
+            else {
+                tooLow = true;
+            }
+            SmartDashboard.putBoolean("Too low", tooLow);
         });
     }
+
     public CommandBase decreaseBottom() {
         return Commands.runOnce(() -> {
-            this.speeds2[index] -= 0.1;
+            // if(percentOutputBottom >= 0.051) {
+            //     this.speedsRight[2] -= 0.05; // TODO DEBUG
+            //     percentOutputBottom -= 0.05;
+            //     tooLow = false;
+            if(velocityBottom >= 1100) {
+                velocityBottom -= 1024;
+                tooLow = false;
+            }
+            else {
+                tooLow = true;
+            }
+            SmartDashboard.putBoolean("Too low", tooLow);
         });
     }
 
@@ -127,12 +182,13 @@ public class Shooter {
 
     public void reportToSmartDashboard(){
         // leftShooter.set(ControlMode.PercentOutput, SmartDashboard.getNumber("Power", 0));
-        // SmartDashboard.putNumber("Left RPM", leftShooter.getSelectedSensorVelocity(0) * 10 / 2048);
-        // SmartDashboard.putNumber("Right RPM", rightShooter.getSelectedSensorVelocity(0) * 10 / 2048);
+        SmartDashboard.putNumber("Left RPS", leftShooter.getSelectedSensorVelocity(0) * 10 / 2048);
+        SmartDashboard.putNumber("Right RPS", rightShooter.getSelectedSensorVelocity(0) * 10 / 2048);
+        SmartDashboard.putNumber("Left Speed", leftShooter.getSelectedSensorVelocity(0));
+        SmartDashboard.putNumber("Right Speed", rightShooter.getSelectedSensorVelocity(0));
         // SmartDashboard.putNumber("Left Current", leftShooter.getSupplyCurrent());
         // SmartDashboard.putNumber("Right Current", rightShooter.getSupplyCurrent());
-        SmartDashboard.putNumber("Percent Output Bottom", percentOutputBottom);
-        SmartDashboard.putNumber("Percent Output Top", percentOutputTop);
+        
     }
 
 }
