@@ -27,6 +27,8 @@ public class RobotContainer {
     commandOperatorController.povLeft().onTrue(shooter.increaseBottom());
     commandOperatorController.povRight().onTrue(shooter.decreaseBottom());
 
+    commandOperatorController.options().onTrue(Commands.runOnce(shooter::confiurePID));
+
     // commandOperatorController.triangle()
     //   .whileTrue(shooter.setIndex(0).andThen(shooter.setSpeed()))
     //   .onFalse(shooter.setPowerZero());

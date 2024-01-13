@@ -67,6 +67,19 @@ public class Shooter {
         SmartDashboard.putNumber("Power", 0);
     }
 
+    public void confiurePID() {
+        kPLeftMotor.loadPreferences();
+        kFLeftMotor.loadPreferences();
+
+        kPRightMotor.loadPreferences();
+        kFRightMotor.loadPreferences();
+
+        leftShooter.config_kP(0, kPLeftMotor.get());
+        leftShooter.config_kF(0, kFLeftMotor.get());
+        rightShooter.config_kP(0, kPRightMotor.get());
+        rightShooter.config_kF(0, kFRightMotor.get());
+    }
+
     public void printSpeeds() {
         SmartDashboard.putNumber("Index", index);
 
