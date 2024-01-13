@@ -6,13 +6,23 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
+import util.preferences.PrefDouble;
 
 public class Shooter {
     private TalonFX leftShooter;
     private TalonFX rightShooter;
+
+    PIDController shooterController;
+
+    public PrefDouble kPLeftMotor = new PrefDouble("Left Motor kP", 0.01);
+    public PrefDouble kPRightMotor = new PrefDouble("Right Motor kP", 0.01);
+    
+    public PrefDouble kFLeftMotor = new PrefDouble("Left Motor kF", 0);
+    public PrefDouble kFRightMotor = new PrefDouble("Right Motor kF", 0);
 
     private double[] speedsLeft = {-0.1, 0.1, 0.0};
     private double[] speedsRight = {-0.1, 0.1, 0.0};
@@ -22,6 +32,7 @@ public class Shooter {
 
     int velocityTop = 0; // 11700 is 60% output
     int velocityBottom = 0;
+    int targetVelocity = 11000;
 
     private int index = 0;
 
@@ -31,6 +42,17 @@ public class Shooter {
     public Shooter(){
         leftShooter = new TalonFX(19);
         rightShooter = new TalonFX(20);
+
+        kPLeftMotor.loadPreferences();
+        kFLeftMotor.loadPreferences();
+
+        kPRightMotor.loadPreferences();
+        kFRightMotor.loadPreferences();
+
+        leftShooter.config_kP(0, kPLeftMotor.get());
+        leftShooter.config_kF(0, kFLeftMotor.get());
+        rightShooter.config_kP(0, kPRightMotor.get());
+        rightShooter.config_kF(0, kFRightMotor.get());
         
         leftShooter.configVoltageCompSaturation(11);
         rightShooter.configVoltageCompSaturation(11);
@@ -41,7 +63,7 @@ public class Shooter {
         leftShooter.setInverted(false);
         rightShooter.setInverted(false);
         // rightShooter.setInverted(TalonFXInvertType.FollowMaster);
-        
+
         SmartDashboard.putNumber("Power", 0);
     }
 
@@ -80,8 +102,16 @@ public class Shooter {
             // leftShooter.set(ControlMode.PercentOutput, percentOutputTop); // TODO DEBUG
             // rightShooter.set(ControlMode.PercentOutput, percentOutputBottom);
 
-            leftShooter.set(ControlMode.Velocity, velocityTop); // TODO DEBUG
+            leftShooter.set(ControlMode.Velocity, velocityTop);
             rightShooter.set(ControlMode.Velocity, velocityBottom);
+        });
+    }
+
+    public CommandBase setTargetSpeed() {
+        return Commands.run(() -> {
+            leftShooter.set(ControlMode.Velocity, targetVelocity);
+            rightShooter.set(ControlMode.Velocity, targetVelocity);
+            SmartDashboard.putBoolean("Setting Target Vel", true);
         });
     }
 
@@ -100,7 +130,7 @@ public class Shooter {
             //     tooHigh = false;
             // }
 
-            if(velocityTop <= 21000) {
+            if (velocityTop <= 21000) {
                 velocityTop += 1024;
                 tooHigh = false;
             }
@@ -118,7 +148,7 @@ public class Shooter {
             //     percentOutputBottom += 0.05;
             //     tooHigh = false;
 
-            if(velocityBottom <= 21000) {
+            if (velocityBottom <= 21000) {
                 velocityBottom += 1024;
                 tooHigh = false;
             }
