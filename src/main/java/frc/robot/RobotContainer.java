@@ -34,7 +34,7 @@ public class RobotContainer {
     //   .onFalse(shooter.setPowerZero());
 
     commandOperatorController.triangle()
-      .whileTrue(shooter.setTargetSpeed())
+      .whileTrue(shooter.setSpeed())
       .onFalse(shooter.setPowerZero());
     
     commandOperatorController.square()

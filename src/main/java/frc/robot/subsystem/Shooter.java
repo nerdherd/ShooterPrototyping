@@ -18,12 +18,15 @@ public class Shooter {
 
     PIDController shooterController;
 
-    public PrefDouble kPLeftMotor = new PrefDouble("Left Motor kP", 0.01);
-    public PrefDouble kPRightMotor = new PrefDouble("Right Motor kP", 0.01);
+    public PrefDouble kPLeftMotor = new PrefDouble("Left Motor kP", 0);
+    public PrefDouble kPRightMotor = new PrefDouble("Right Motor kP", 0);
     
-    public PrefDouble kFLeftMotor = new PrefDouble("Left Motor kF", 0);
-    public PrefDouble kFRightMotor = new PrefDouble("Right Motor kF", 0);
+    public PrefDouble kFLeftMotor = new PrefDouble("Left Motor kF", 0.05);
+    public PrefDouble kFRightMotor = new PrefDouble("Right Motor kF", 0.05);
 
+    public PrefDouble kDRightMotor = new PrefDouble("Right Motor kD", 0.05);
+    public PrefDouble kDLeftMotor = new PrefDouble("Left Motor kD", 0);
+    
     private double[] speedsLeft = {-0.1, 0.1, 0.0};
     private double[] speedsRight = {-0.1, 0.1, 0.0};
 
@@ -45,14 +48,22 @@ public class Shooter {
 
         kPLeftMotor.loadPreferences();
         kFLeftMotor.loadPreferences();
+        kDLeftMotor.loadPreferences();
+
 
         kPRightMotor.loadPreferences();
         kFRightMotor.loadPreferences();
+        kDRightMotor.loadPreferences();
+
 
         leftShooter.config_kP(0, kPLeftMotor.get());
         leftShooter.config_kF(0, kFLeftMotor.get());
+        leftShooter.config_kD(0, kDLeftMotor.get());
+
         rightShooter.config_kP(0, kPRightMotor.get());
         rightShooter.config_kF(0, kFRightMotor.get());
+        rightShooter.config_kD(0, kDRightMotor.get());
+
         
         leftShooter.configVoltageCompSaturation(11);
         rightShooter.configVoltageCompSaturation(11);
@@ -70,14 +81,18 @@ public class Shooter {
     public void confiurePID() {
         kPLeftMotor.loadPreferences();
         kFLeftMotor.loadPreferences();
-
+        kDLeftMotor.loadPreferences();
         kPRightMotor.loadPreferences();
         kFRightMotor.loadPreferences();
+        kDRightMotor.loadPreferences();
 
         leftShooter.config_kP(0, kPLeftMotor.get());
         leftShooter.config_kF(0, kFLeftMotor.get());
+        leftShooter.config_kD(0, kDLeftMotor.get());
         rightShooter.config_kP(0, kPRightMotor.get());
         rightShooter.config_kF(0, kFRightMotor.get());
+        rightShooter.config_kD(0, kDRightMotor.get());
+
     }
 
     public void printSpeeds() {
@@ -229,6 +244,8 @@ public class Shooter {
         SmartDashboard.putNumber("Right RPS", rightShooter.getSelectedSensorVelocity(0) * 10 / 2048);
         SmartDashboard.putNumber("Left Speed", leftShooter.getSelectedSensorVelocity(0));
         SmartDashboard.putNumber("Right Speed", rightShooter.getSelectedSensorVelocity(0));
+        SmartDashboard.putNumber("Left Target Speed", velocityTop);
+        SmartDashboard.putNumber("Right Target Speed", velocityBottom);
         // SmartDashboard.putNumber("Left Current", leftShooter.getSupplyCurrent());
         // SmartDashboard.putNumber("Right Current", rightShooter.getSupplyCurrent());
         
